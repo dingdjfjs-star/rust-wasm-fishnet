@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoJSON 渔网生成器 · Rust + WASM</title>
+<style>
+  :root { --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; --err:#b91c1c; --ok:#15803d; --bg:#f8fafc; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:1100px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:13px; margin:0 0 20px; }
+  .layout { display:grid; grid-template-columns:340px 1fr; gap:16px; align-items:start; }
+  @media (max-width:860px) { .layout { grid-template-columns:1fr; } }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .panel h2 { font-size:13px; margin:0 0 12px; color:var(--muted); font-weight:600; letter-spacing:.5px; }
+  fieldset { border:1px solid var(--line); border-radius:8px; margin:0 0 12px; padding:10px 12px; }
+  legend { font-size:12px; color:var(--muted); padding:0 6px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  label { font-size:12px; color:var(--muted); display:block; margin-bottom:2px; }
+  input { width:100%; padding:7px 8px; font:13px/1 Consolas,monospace; border:1px solid var(--line); border-radius:6px; color:var(--ink); }
+  input:focus { outline:2px solid var(--accent); outline-offset:0; border-color:transparent; }
+  button { cursor:pointer; border:none; border-radius:6px; font-size:13px; }
+  #btn-gen { width:100%; padding:10px; background:var(--accent); color:#fff; font-size:14px; }
+  #btn-gen:disabled { background:#9ca3af; cursor:not-allowed; }
+  #btn-copy { padding:4px 10px; background:#eef2ff; color:var(--accent); border:1px solid #c7d2fe; }
+  #status { font-size:13px; margin-top:10px; min-height:18px; line-height:1.5; }
+  .err { color:var(--err); } .ok { color:var(--ok); } .muted { color:var(--muted); }
+  #preview { width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; display:block; }
+  .out-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .out-head h2 { margin:0; }
+  pre { margin:0; max-height:420px; overflow:auto; background:#0f172a; color:#e2e8f0; font:12px/1.5 Consolas,monospace; padding:12px; border-radius:8px; white-space:pre; }
+  .hint { font-size:12px; color:var(--muted); margin:10px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>GeoJSON 渔网生成器</h1>
+  <p class="sub">空间计算在 Rust 中完成并编译为 WASM，浏览器只负责输入、预览与复制 —— 前端零重计算</p>
+  <div class="layout">
+    <!-- 左：参数表单 -->
+    <section class="panel">
+      <h2>参数</h2>
+      <form id="form" autocomplete="off">
+        <fieldset>
+          <legend>四至范围 extent（坐标允许负值）</legend>
+          <div class="grid2">
+            <div><label for="xmin">xmin（西）</label><input id="xmin" value="113"></div>
+            <div><label for="ymin">ymin（南）</label><input id="ymin" value="28"></div>
+            <div><label for="xmax">xmax（东）</label><input id="xmax" value="114"></div>
+            <div><label for="ymax">ymax（北）</label><input id="ymax" value="29"></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>格网单元尺寸（地图单位）</legend>
+          <div class="grid2">
+            <div><label for="cw">格网宽 cell_w</label><input id="cw" value="0.25"></div>
+            <div><label for="ch">格网高 cell_h</label><input id="ch" value="0.25"></div>
+          </div>
+        </fieldset>
+        <button id="btn-gen" type="submit" disabled>WASM 加载中…</button>
+        <div id="status" class="muted">正在加载 WASM 模块…</div>
+      </form>
+      <p class="hint">行列数 = ⌈边长 ÷ 单元尺寸⌉，末行/末列不足一格时截断到四至边界，渔网恰好填满四至。</p>
+    </section>
+    <!-- 右：预览 + GeoJSON 输出 -->
+    <div>
+      <section class="panel" style="margin-bottom:16px;">
+        <h2>预览</h2>
+        <canvas id="preview" width="720" height="480"></canvas>
+      </section>
+      <section class="panel">
+        <div class="out-head">
+          <h2>GeoJSON 输出</h2>
+          <button id="btn-copy" type="button" disabled>一键复制</button>
+        </div>
+        <pre id="output">（点击"生成渔网"后，此处显示 WASM 返回的 GeoJSON 文本）</pre>
+      </section>
+    </div>
+  </div>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

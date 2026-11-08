@@ -1,0 +1,17 @@
+{
+  "name": "rust-wasm-fishnet",
+  "type": "module",
+  "description": "GeoJSON 渔网生成器：Rust 核心算法（geo + geojson crate），编译为 WASM 供前端调用",
+  "version": "0.1.0",
+  "license": "MIT",
+  "files": [
+    "rust_wasm_fishnet_bg.wasm",
+    "rust_wasm_fishnet.js",
+    "rust_wasm_fishnet.d.ts"
+  ],
+  "main": "rust_wasm_fishnet.js",
+  "types": "rust_wasm_fishnet.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

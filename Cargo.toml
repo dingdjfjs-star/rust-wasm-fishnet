@@ -1,0 +1,29 @@
+[package]
+name = "rust-wasm-fishnet"
+version = "0.1.0"
+edition = "2021"
+description = "GeoJSON 渔网生成器：Rust 核心算法（geo + geojson crate），编译为 WASM 供前端调用"
+license = "MIT"
+
+# rlib 供原生 cargo test 使用；cdylib 供 wasm-pack 产出 wasm 模块
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+# geo：几何类型与算法（Polygon 构造、面积/包围盒等校验）
+geo = "0.28"
+# geojson：标准 GeoJSON FeatureCollection 序列化（默认开启 geo-types 集成，可直接从 geo 类型转换）
+geojson = "0.24"
+serde_json = "1"
+# wasm-bindgen：Rust ↔ JS 桥（仅 wasm32 目标实际生效）
+wasm-bindgen = "0.2"
+
+[profile.release]
+# wasm 体积优先：s 级优化 + LTO，产物约几十 KB
+opt-level = "s"
+lto = true
+
+# wasm-pack 配置：本机 github.com 直连被阻、binaryen(wasm-opt) 下载失败时，
+# 关闭 wasm-opt 后处理（体积略增，可接受；排坑清单有说明）
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false

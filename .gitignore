@@ -1,0 +1,4 @@
+# Rust 构建产物
+/target/
+# wasm-pack 输出（可随时用 wasm-pack build 重新生成）
+/pkg/
